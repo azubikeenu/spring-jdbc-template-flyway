@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.List;
 
 @Component
 public class AuthorDaoImpl implements AuthorDao {
@@ -159,6 +160,11 @@ public class AuthorDaoImpl implements AuthorDao {
 
       }
     }
+  }
+
+  @Override
+  public List<Author> findAllAuthors() {
+    return null;
   }
 
   private Author getAuthorFromRS(ResultSet resultSet) throws SQLException {

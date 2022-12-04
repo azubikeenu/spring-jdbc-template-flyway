@@ -9,6 +9,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -49,6 +51,9 @@ class AuthorHibernateDaoTest {
     final Author savedAuthor = authorDao.saveNewAuthor(author);
     assertThat(savedAuthor).isNotNull();
     assertThat(savedAuthor.getId()).isNotNull();
+    // delete the author from the database =>this is necessary because of the different transaction
+    // threads between hibernate and spring context
+    authorDao.deleteAuthorById(savedAuthor.getId());
   }
 
   @Test
@@ -63,5 +68,18 @@ class AuthorHibernateDaoTest {
   }
 
   @Test
-  void deleteAuthorById() {}
+  void deleteAuthorById() {
+    Author author = new Author();
+    author.setFirstName("john");
+    author.setLastName("t");
+    Author saved = authorDao.saveNewAuthor(author);
+    authorDao.deleteAuthorById(saved.getId());
+    assertThrows(NullPointerException.class, () -> authorDao.getById(saved.getId()));
+  }
+
+  @Test
+  void findAllAuthors() {
+    final List<Author> authors = authorDao.findAllAuthors();
+    assertThat(authors.size()).isGreaterThan(0);
+  }
 }

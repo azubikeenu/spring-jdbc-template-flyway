@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -35,9 +37,10 @@ public class AuthorHibernateDao implements AuthorDao {
 
   @Override
   public Author saveNewAuthor(Author author) {
-    final EntityManager em = getEntityManager();
+    EntityManager em = getEntityManager();
     em.getTransaction().begin();
     em.persist(author);
+    em.flush();
     em.getTransaction().commit();
     return author;
   }
@@ -53,7 +56,21 @@ public class AuthorHibernateDao implements AuthorDao {
   }
 
   @Override
-  public void deleteAuthorById(Long id) {}
+  public void deleteAuthorById(Long id) {
+    EntityManager em = getEntityManager();
+    em.getTransaction().begin();
+    Author author = em.find(Author.class, id);
+    em.remove(author);
+    em.flush();
+    em.getTransaction().commit();
+  }
+
+  @Override
+  public List<Author> findAllAuthors() {
+    final EntityManager em = getEntityManager();
+    final TypedQuery<Author> authors = em.createNamedQuery("author_find_all", Author.class);
+    return authors.getResultList();
+  }
 
   private EntityManager getEntityManager() {
     return entityManagerFactory.createEntityManager();

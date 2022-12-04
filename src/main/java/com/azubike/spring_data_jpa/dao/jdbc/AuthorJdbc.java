@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class AuthorJdbc implements AuthorDao {
   JdbcTemplate jdbcTemplate;
@@ -66,6 +67,11 @@ public class AuthorJdbc implements AuthorDao {
     final String QUERY = "DELETE FROM author WHERE id = :id";
     MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource().addValue("id", id);
     namedParameterJdbcTemplate.update(QUERY, mapSqlParameterSource);
+  }
+
+  @Override
+  public List<Author> findAllAuthors() {
+    return null;
   }
 
   private RowMapper<Author> getAuthorRowMapper() {
