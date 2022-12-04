@@ -21,15 +21,14 @@ public class DataInitializer implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    bookRepository.deleteAll();
-    authorRepository.truncateTable();
+    performCleanUp();
     Book DDD = new Book("Domain driven design", "123", "Waldorf Publishers", null);
-    final Book savedBook = bookRepository.save(DDD);
+    bookRepository.save(DDD);
     final Book spring_in_action = new Book("Spring in action", "1278", "O'Reilly", null);
-    final Book savedBook2 = bookRepository.save(spring_in_action);
+    bookRepository.save(spring_in_action);
     // Create Authors
-    final Author authorOne = authorRepository.save(new Author("Richard", "Enu"));
-    final Author authorTwo = authorRepository.save(new Author("Amaka", "Enu"));
+    authorRepository.save(new Author("Richard", "Enu"));
+    authorRepository.save(new Author("Amaka", "Enu"));
 
     System.out.println("----------Books-------------");
     bookRepository
@@ -48,5 +47,12 @@ public class DataInitializer implements CommandLineRunner {
                   "First_name :%s - Last_name : %s \n",
                   author.getFirstName(), author.getLastName());
             });
+  }
+
+  private void performCleanUp() {
+    bookRepository.deleteAll();
+    authorRepository.deleteAll();
+    authorRepository.truncateTable();
+    bookRepository.truncateTable();
   }
 }

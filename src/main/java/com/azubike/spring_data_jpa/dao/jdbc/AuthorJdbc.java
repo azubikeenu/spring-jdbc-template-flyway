@@ -1,8 +1,10 @@
 package com.azubike.spring_data_jpa.dao.jdbc;
 
 import com.azubike.spring_data_jpa.dao.AuthorDao;
+import com.azubike.spring_data_jpa.dao.AuthorMapper;
 import com.azubike.spring_data_jpa.domain.Author;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -11,7 +13,6 @@ import java.sql.SQLException;
 
 public class AuthorJdbc implements AuthorDao {
   JdbcTemplate jdbcTemplate;
-
   private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
   public AuthorJdbc(
@@ -23,7 +24,7 @@ public class AuthorJdbc implements AuthorDao {
   @Override
   public Author getById(Long id) {
     final String QUERY = "SELECT * FROM author WHERE id = ?";
-    return jdbcTemplate.queryForObject(QUERY, this::mapToAuthor, id);
+    return jdbcTemplate.queryForObject(QUERY, getAuthorRowMapper(), id);
   }
 
   @Override
@@ -65,6 +66,10 @@ public class AuthorJdbc implements AuthorDao {
     final String QUERY = "DELETE FROM author WHERE id = :id";
     MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource().addValue("id", id);
     namedParameterJdbcTemplate.update(QUERY, mapSqlParameterSource);
+  }
+
+  private RowMapper<Author> getAuthorRowMapper() {
+    return new AuthorMapper();
   }
 
   private Author mapToAuthor(ResultSet rs, int rowNum) throws SQLException {

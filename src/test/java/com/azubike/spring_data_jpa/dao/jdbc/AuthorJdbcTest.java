@@ -2,10 +2,12 @@ package com.azubike.spring_data_jpa.dao.jdbc;
 
 import com.azubike.spring_data_jpa.dao.AuthorDao;
 import com.azubike.spring_data_jpa.domain.Author;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ActiveProfiles;
@@ -15,20 +17,31 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("local")
 @Import(AuthorJdbc.class)
+@ComponentScan({"com.azubike.spring_data_jpa.bootstrap"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 class AuthorJdbcTest {
   @Autowired AuthorDao authorDao;
+  Author savedAuthor;
+
+  @BeforeEach
+  void setUp() {
+    Author author = new Author();
+    author.setLastName("Richard");
+    author.setFirstName("Enu");
+    savedAuthor = authorDao.saveNewAuthor(author);
+  }
 
   @Test
   void getById() {
-    Author author = authorDao.getById(1L);
-    assertThat(author).isNotNull();
+    Author foundAuthor = authorDao.getById(savedAuthor.getId());
+    assertThat(foundAuthor).isNotNull();
+    System.out.println(authorDao.getClass().toString());
   }
 
   @Test
   void testGetAuthorByName() {
-    Author author = authorDao.findAuthorByName("Amaka", "Enu");
+    Author author = authorDao.findAuthorByName(savedAuthor.getFirstName(), savedAuthor.getLastName());
     assertThat(author).isNotNull();
   }
 
@@ -49,6 +62,7 @@ class AuthorJdbcTest {
     savedAuthor.setLastName("Enu");
     final Author updatedAuthor = authorDao.updateAuthor(savedAuthor);
     assertThat(updatedAuthor.getLastName()).isEqualTo("Enu");
+    assertThat(updatedAuthor).isEqualTo(savedAuthor);
   }
 
   @Test

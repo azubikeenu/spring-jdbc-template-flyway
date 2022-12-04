@@ -1,7 +1,6 @@
-package com.azubike.spring_data_jpa;
+package com.azubike.spring_data_jpa.dao.hibernate;
 
 import com.azubike.spring_data_jpa.dao.AuthorDao;
-import com.azubike.spring_data_jpa.dao.AuthorDaoImpl;
 import com.azubike.spring_data_jpa.domain.Author;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,55 +10,58 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("local")
 @DataJpaTest
-@Import({AuthorDaoImpl.class})
+@Import(AuthorHibernateDao.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class AuthorDaoIntegrationTest {
-
+class AuthorHibernateDaoTest {
   @Autowired AuthorDao authorDao;
 
   @Test
-  void testSaveAuthor() {
+  void getById() {
+    final Author foundAuthor = authorDao.getById(1L);
+    assertThat(foundAuthor).isNotNull();
+    assertThat(1L).isEqualTo(foundAuthor.getId());
+  }
+
+  @Test
+  void shouldThrowAndExceptionWhenIdNotFound() {
+    assertThrows(
+        RuntimeException.class,
+        () -> {
+          authorDao.getById(10L);
+        });
+  }
+
+  @Test
+  void findAuthorByName() {
+    final Author authorByName = authorDao.findAuthorByName("Richard", "Enu");
+    assertThat(authorByName).isNotNull();
+  }
+
+  @Test
+  void saveNewAuthor() {
     Author author = new Author();
     author.setFirstName("John");
-    author.setLastName("Thompson");
-    Author saved = authorDao.saveNewAuthor(author);
-    assertThat(saved).isNotNull();
-
+    author.setLastName("Richard");
+    final Author savedAuthor = authorDao.saveNewAuthor(author);
+    assertThat(savedAuthor).isNotNull();
+    assertThat(savedAuthor.getId()).isNotNull();
   }
 
   @Test
-  void testGetAuthorByName() {
-    Author author = authorDao.findAuthorByName("Amaka", "Enu");
-    assertThat(author).isNotNull();
-  }
-
-  @Test
-  void testGetAuthor() {
-    Author author = authorDao.getById(1L);
-    assertThat(author).isNotNull();
-  }
-
-  @Test
-  void testUpdateAuthor() {
+  void updateAuthor() {
     Author author = new Author("Sandra", "Richards");
     var savedAuthor = authorDao.saveNewAuthor(author);
     assertThat(savedAuthor).isNotNull();
     savedAuthor.setLastName("Enu");
     final Author updatedAuthor = authorDao.updateAuthor(savedAuthor);
     assertThat(updatedAuthor.getLastName()).isEqualTo("Enu");
+    assertThat(updatedAuthor).isEqualTo(savedAuthor);
   }
 
   @Test
-  void testDeleteAuthor() {
-    Author author = new Author();
-    author.setFirstName("john");
-    author.setLastName("t");
-    Author saved = authorDao.saveNewAuthor(author);
-    authorDao.deleteAuthorById(saved.getId());
-    Author deleted = authorDao.getById(saved.getId());
-    assertThat(deleted).isNull();
-  }
+  void deleteAuthorById() {}
 }

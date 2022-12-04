@@ -136,7 +136,7 @@ public class AuthorDaoImpl implements AuthorDao {
       }
     }
 
-    return this.getById(author.getId());
+    return getById(author.getId());
   }
 
   @Override
